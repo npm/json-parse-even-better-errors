@@ -11,7 +11,7 @@ repository:
   enable_vulnerability_alerts: true
 
 branches:
-  - name: latest
+  - name: main
     protection:
       required_status_checks: null
       enforce_admins: true
