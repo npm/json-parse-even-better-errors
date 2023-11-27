@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.0.1](https://github.com/npm/json-parse-even-better-errors/compare/v3.0.0...v3.0.1) (2023-11-27)
+
+### Bug Fixes
+
+* [`1e54107`](https://github.com/npm/json-parse-even-better-errors/commit/1e54107648d0b9a86f6c64aac538252726e501c4) [#25](https://github.com/npm/json-parse-even-better-errors/pull/25) refactor for new error style in node 20 (@lukekarrys)
+
 ## [3.0.0](https://github.com/npm/json-parse-even-better-errors/compare/v2.3.1...v3.0.0) (2022-10-10)
 
 ### ⚠️ BREAKING CHANGES
