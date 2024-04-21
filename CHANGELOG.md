@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.2](https://github.com/npm/json-parse-even-better-errors/compare/v3.0.1...v3.0.2) (2024-04-21)
+
+### Chores
+
+* [`bec4a57`](https://github.com/npm/json-parse-even-better-errors/commit/bec4a576101beb7368a488cfec9a58d29dc310c8) [#53](https://github.com/npm/json-parse-even-better-errors/pull/53) postinstall for dependabot template-oss PR (@lukekarrys)
+* [`04a6747`](https://github.com/npm/json-parse-even-better-errors/commit/04a6747cb709d558c1635b565513eeb7c945c80f) [#53](https://github.com/npm/json-parse-even-better-errors/pull/53) bump @npmcli/template-oss from 4.21.3 to 4.21.4 (@dependabot[bot])
+
 ## [3.0.1](https://github.com/npm/json-parse-even-better-errors/compare/v3.0.0...v3.0.1) (2023-11-27)
 
 ### Bug Fixes
