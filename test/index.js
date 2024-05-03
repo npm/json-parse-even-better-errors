@@ -171,7 +171,7 @@ t.test('throws SyntaxError for unexpected end of JSON', (t) => {
         20: /Unterminated string in JSON at position \d+/,
         default: /Unexpected end of JSON input/,
       },
-      / while parsing "{\\"foo: bar}"/
+      /.* while parsing "{\\"foo: bar}"/
     ),
     code: 'EJSONPARSE',
     position: getLatestMatchingNode({ 20: 11, default: 10 }),
@@ -207,7 +207,7 @@ t.test('SyntaxError with less context (limited start)', (t) => {
         20: 'Unterminated string in JSON at position 9',
         default: 'Unexpected end of JSON input',
       },
-      ' while parsing near "...',
+      /.* while parsing near "\.\.\./,
       {
         20: '210',
         default: '3210',
@@ -230,7 +230,7 @@ t.test('SyntaxError with less context (limited end)', (t) => {
         20: ', "abcde" is not valid JSON',
         default: ' in JSON at position 0',
       },
-      ' while parsing ',
+      /.* while parsing .*/,
       {
         20: "'abcd'",
         default: 'near "ab..."',
@@ -247,9 +247,12 @@ t.test('SyntaxError with less context (limited end)', (t) => {
 t.test('throws for end of input', (t) => {
   const data = '{"a":1,""'
   jsonThrows(t, data, 2, {
-    message: expectMessage('Unexpected end of JSON input while parsing'),
+    message: expectMessage({
+      22: `Expected ':' after property name in JSON at`,
+      default: 'Unexpected end of JSON input while parsing',
+    }),
     code: 'EJSONPARSE',
-    position: 8,
+    position: getLatestMatchingNode({ 22: 9, default: 8 }),
     name: 'JSONParseError',
     systemError: SyntaxError,
   })
