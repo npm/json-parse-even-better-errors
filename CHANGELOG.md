@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.0.0](https://github.com/npm/json-parse-even-better-errors/compare/v3.0.2...v4.0.0) (2024-09-03)
+### ⚠️ BREAKING CHANGES
+* `json-parse-even-better-errors` now supports node `^18.17.0 || >=20.5.0`
+### Bug Fixes
+* [`f52a9ae`](https://github.com/npm/json-parse-even-better-errors/commit/f52a9ae249be95e2b4f3685adb4a0044e6271a67) [#69](https://github.com/npm/json-parse-even-better-errors/pull/69) align to npm 10 node engine range (@hashtagchris)
+### Chores
+* [`ae5914c`](https://github.com/npm/json-parse-even-better-errors/commit/ae5914cc99e4d871ec43144b524cee197a7761f8) [#69](https://github.com/npm/json-parse-even-better-errors/pull/69) run template-oss-apply (@hashtagchris)
+* [`07134dd`](https://github.com/npm/json-parse-even-better-errors/commit/07134dd2ab6b0531a7d60092e7203f0f01fc8e36) [#67](https://github.com/npm/json-parse-even-better-errors/pull/67) bump @npmcli/eslint-config from 4.0.5 to 5.0.0 (@dependabot[bot])
+* [`27183c7`](https://github.com/npm/json-parse-even-better-errors/commit/27183c7e06c66908c822781fb82832acf5fd5447) [#68](https://github.com/npm/json-parse-even-better-errors/pull/68) postinstall for dependabot template-oss PR (@hashtagchris)
+* [`344d304`](https://github.com/npm/json-parse-even-better-errors/commit/344d3049d6753b44165cd97700d88103cabc3977) [#68](https://github.com/npm/json-parse-even-better-errors/pull/68) bump @npmcli/template-oss from 4.23.1 to 4.23.3 (@dependabot[bot])
+
 ## [3.0.2](https://github.com/npm/json-parse-even-better-errors/compare/v3.0.1...v3.0.2) (2024-05-04)
 
 ### Bug Fixes
