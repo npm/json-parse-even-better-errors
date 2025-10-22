@@ -1,5 +1,14 @@
 # Changelog
 
+## [5.0.0](https://github.com/npm/json-parse-even-better-errors/compare/v4.0.0...v5.0.0) (2025-10-22)
+### ⚠️ BREAKING CHANGES
+* `json-parse-even-better-errors` now supports node `^20.17.0 || >=22.9.0`
+### Bug Fixes
+* [`f50584e`](https://github.com/npm/json-parse-even-better-errors/commit/f50584efd8006cd9c61590f45249c1b1a3cd224b) [#78](https://github.com/npm/json-parse-even-better-errors/pull/78) align to npm 11 node engine range (#78) (@owlstronaut)
+### Chores
+* [`1ed8feb`](https://github.com/npm/json-parse-even-better-errors/commit/1ed8febca407165a1c407a72cf7626473f9e28a3) [#73](https://github.com/npm/json-parse-even-better-errors/pull/73) postinstall workflow updates (#73) (@owlstronaut)
+* [`6112f07`](https://github.com/npm/json-parse-even-better-errors/commit/6112f07107403d58c8816f3569504c57c101b557) [#79](https://github.com/npm/json-parse-even-better-errors/pull/79) bump @npmcli/template-oss from 4.26.0 to 4.27.1 (#79) (@dependabot[bot], @npm-cli-bot)
+
 ## [4.0.0](https://github.com/npm/json-parse-even-better-errors/compare/v3.0.2...v4.0.0) (2024-09-03)
 ### ⚠️ BREAKING CHANGES
 * `json-parse-even-better-errors` now supports node `^18.17.0 || >=20.5.0`
