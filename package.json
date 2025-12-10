@@ -8,14 +8,16 @@
     "lib/"
   ],
   "scripts": {
-    "test": "tap",
-    "snap": "tap",
+    "test": "node --test './test/**/*.js'",
+    "snap": "node --test --test-update-snapshots './test/**/*.js'",
     "lint": "npm run eslint",
     "postlint": "template-oss-check",
     "template-oss-apply": "template-oss-apply --force",
     "lintfix": "npm run eslint -- --fix",
     "posttest": "npm run lint",
-    "eslint": "eslint \"**/*.{js,cjs,ts,mjs,jsx,tsx}\""
+    "eslint": "eslint \"**/*.{js,cjs,ts,mjs,jsx,tsx}\"",
+    "test:node20": "node --test test",
+    "test:cover": "node --test --experimental-test-coverage --test-timeout=3000 --test-coverage-lines=100 --test-coverage-functions=100 --test-coverage-branches=100 './test/**/*.js'"
   },
   "repository": {
     "type": "git",
@@ -32,19 +34,14 @@
     "@npmcli/template-oss": "4.28.1",
     "tap": "^16.3.0"
   },
-  "tap": {
-    "check-coverage": true,
-    "nyc-arg": [
-      "--exclude",
-      "tap-snapshots/**"
-    ]
-  },
   "engines": {
     "node": "^20.17.0 || >=22.9.0"
   },
   "templateOSS": {
     "//@npmcli/template-oss": "This file is partially managed by @npmcli/template-oss. Edits may be overwritten.",
     "version": "4.28.1",
-    "publish": true
+    "publish": true,
+    "testRunner": "node:test",
+    "latestCiVersion": 24
   }
 }
