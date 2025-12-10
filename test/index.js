@@ -1,6 +1,7 @@
 'use strict'
 
-const t = require('tap')
+const { test } = require('node:test')
+const assert = require('node:assert')
 const parseJson = require('..')
 
 const currentNodeMajor = +process.version.split('.')[0].slice(1)
@@ -25,15 +26,52 @@ const expectMessage = (...args) => new RegExp(args.map((rawValue) => {
   return value instanceof RegExp ? value.source : value
 }).join(''))
 
-const jsonThrows = (t, data, ...args) => {
+const jsonThrows = (data, ...args) => {
   let context
   if (typeof args[0] === 'number') {
     context = args.shift()
   }
-  return t.throws(() => parseJson(data, null, context), ...args)
+  const expected = args[0]
+
+  // If expected is an Error constructor or instance, use it directly
+  if (typeof expected === 'function' || expected instanceof Error) {
+    assert.throws(() => parseJson(data, null, context), expected)
+    return
+  }
+
+  let err
+  try {
+    parseJson(data, null, context)
+    assert.fail('Expected parseJson to throw')
+  } catch (e) {
+    err = e
+  }
+
+  if (expected.message) {
+    if (expected.message instanceof RegExp) {
+      assert.match(err.message, expected.message, 'error message should match pattern')
+    } else {
+      assert.strictEqual(err.message, expected.message, 'error message should match')
+    }
+  }
+  if (expected.code) {
+    assert.strictEqual(err.code, expected.code, 'error code should match')
+  }
+  if (expected.name) {
+    assert.strictEqual(err.name, expected.name, 'error name should match')
+  }
+  if (expected.position !== undefined) {
+    assert.strictEqual(err.position, expected.position, 'error position should match')
+  }
+  if (expected.systemError) {
+    assert.ok(
+      err.systemError instanceof expected.systemError,
+      `systemError should be instance of ${expected.systemError.name}`
+    )
+  }
 }
 
-t.test('parses JSON', (t) => {
+test('parses JSON', () => {
   const cases = Object.entries({
     object: {
       foo: 1,
@@ -47,13 +85,13 @@ t.test('parses JSON', (t) => {
     true: true,
     false: false,
   }).map(([name, obj]) => [name, JSON.stringify(obj)])
-  t.plan(cases.length)
   for (const [name, data] of cases) {
-    t.same(parseJson(data), JSON.parse(data), name)
+    // Use JSON.stringify for comparison to ignore Symbol properties
+    assert.strictEqual(JSON.stringify(parseJson(data)), JSON.stringify(JSON.parse(data)), name)
   }
 })
 
-t.test('preserves indentation and newline styles', (t) => {
+test('preserves indentation and newline styles', async () => {
   const kIndent = Symbol.for('indent')
   const kNewline = Symbol.for('newline')
   const object = { name: 'object', version: '1.2.3' }
@@ -63,20 +101,18 @@ t.test('preserves indentation and newline styles', (t) => {
       for (const [type, obj] of Object.entries({ object, array })) {
         const n = JSON.stringify({ type, newline, indent })
         const txt = JSON.stringify(obj, null, indent).replace(/\n/g, newline)
-        t.test(n, (t) => {
+        await test(n, () => {
           const res = parseJson(txt)
           // no newline if no indentation
-          t.equal(res[kNewline], indent && newline, 'preserved newline')
-          t.equal(res[kIndent], indent, 'preserved indent')
-          t.end()
+          assert.strictEqual(res[kNewline], indent && newline, 'preserved newline')
+          assert.strictEqual(res[kIndent], indent, 'preserved indent')
         })
       }
     }
   }
-  t.end()
 })
 
-t.test('indentation is the default when object/array is empty', (t) => {
+test('indentation is the default when object/array is empty', async () => {
   const kIndent = Symbol.for('indent')
   const kNewline = Symbol.for('newline')
   const obj = '{}'
@@ -84,18 +120,16 @@ t.test('indentation is the default when object/array is empty', (t) => {
   for (const newline of ['', '\n', '\r\n', '\n\n', '\r\n\r\n']) {
     const expect = newline || '\n'
     for (const str of [obj, arr]) {
-      t.test(JSON.stringify({ str, newline, expect }), (t) => {
+      await test(JSON.stringify({ str, newline, expect }), () => {
         const res = parseJson(str + newline)
-        t.equal(res[kNewline], expect, 'got expected newline')
-        t.equal(res[kIndent], '  ', 'got expected default indentation')
-        t.end()
+        assert.strictEqual(res[kNewline], expect, 'got expected newline')
+        assert.strictEqual(res[kIndent], '  ', 'got expected default indentation')
       })
     }
   }
-  t.end()
 })
 
-t.test('parses JSON if it is a Buffer, removing BOM bytes', (t) => {
+test('parses JSON if it is a Buffer, removing BOM bytes', () => {
   const str = JSON.stringify({
     foo: 1,
     bar: {
@@ -104,12 +138,11 @@ t.test('parses JSON if it is a Buffer, removing BOM bytes', (t) => {
   })
   const data = Buffer.from(str)
   const bom = Buffer.concat([Buffer.from([0xef, 0xbb, 0xbf]), data])
-  t.same(parseJson(data), JSON.parse(str))
-  t.same(parseJson(bom), JSON.parse(str), 'strips the byte order marker')
-  t.end()
+  assert.strictEqual(JSON.stringify(parseJson(data)), str)
+  assert.strictEqual(JSON.stringify(parseJson(bom)), str, 'strips the byte order marker')
 })
 
-t.test('better errors when faced with \\b and other malarky', (t) => {
+test('better errors when faced with \\b and other malarky', () => {
   const str = JSON.stringify({
     foo: 1,
     bar: {
@@ -122,15 +155,13 @@ t.test('better errors when faced with \\b and other malarky', (t) => {
   ])
 
   jsonThrows(
-    t,
     bombom,
     {
       message: /Unexpected token "." \(0xFEFF\)/,
-    },
-    'only strips a single BOM, not multiple'
+    }
   )
 
-  jsonThrows(t, str + '\b\b\b\b\b\b\b\b\b\b\b\b', {
+  jsonThrows(str + '\b\b\b\b\b\b\b\b\b\b\b\b', {
     message: expectMessage(
       'Unexpected ',
       {
@@ -140,13 +171,11 @@ t.test('better errors when faced with \\b and other malarky', (t) => {
       / at position.*\\b"/
     ),
   })
-
-  t.end()
 })
 
-t.test('throws SyntaxError for unexpected token', (t) => {
+test('throws SyntaxError for unexpected token', () => {
   const data = 'foo'
-  jsonThrows(t, data, {
+  jsonThrows(data, {
     message: expectMessage(
       /Unexpected token "o" \(0x6F\)/,
       {
@@ -160,12 +189,11 @@ t.test('throws SyntaxError for unexpected token', (t) => {
     name: 'JSONParseError',
     systemError: SyntaxError,
   })
-  t.end()
 })
 
-t.test('throws SyntaxError for unexpected end of JSON', (t) => {
+test('throws SyntaxError for unexpected end of JSON', () => {
   const data = '{"foo: bar}'
-  jsonThrows(t, data, {
+  jsonThrows(data, {
     message: expectMessage(
       {
         20: /Unterminated string in JSON at position \d+/,
@@ -178,12 +206,11 @@ t.test('throws SyntaxError for unexpected end of JSON', (t) => {
     name: 'JSONParseError',
     systemError: SyntaxError,
   })
-  t.end()
 })
 
-t.test('throws SyntaxError for unexpected number', (t) => {
+test('throws SyntaxError for unexpected number', () => {
   const data = '[[1,2],{3,3,3,3,3}]'
-  jsonThrows(t, data, {
+  jsonThrows(data, {
     message: expectMessage(
       {
         20: "Expected property name or '}'",
@@ -196,12 +223,11 @@ t.test('throws SyntaxError for unexpected number', (t) => {
     name: 'JSONParseError',
     systemError: SyntaxError,
   })
-  t.end()
 })
 
-t.test('SyntaxError with less context (limited start)', (t) => {
+test('SyntaxError with less context (limited start)', () => {
   const data = '{"6543210'
-  jsonThrows(t, data, 3, {
+  jsonThrows(data, 3, {
     message: expectMessage(
       {
         20: 'Unterminated string in JSON at position 9',
@@ -218,12 +244,11 @@ t.test('SyntaxError with less context (limited start)', (t) => {
     name: 'JSONParseError',
     systemError: SyntaxError,
   })
-  t.end()
 })
 
-t.test('SyntaxError with less context (limited end)', (t) => {
+test('SyntaxError with less context (limited end)', () => {
   const data = 'abcde'
-  jsonThrows(t, data, 2, {
+  jsonThrows(data, 2, {
     message: expectMessage(
       /Unexpected token "a" \(0x61\)/,
       {
@@ -241,12 +266,11 @@ t.test('SyntaxError with less context (limited end)', (t) => {
     name: 'JSONParseError',
     systemError: SyntaxError,
   })
-  t.end()
 })
 
-t.test('throws for end of input', (t) => {
+test('throws for end of input', () => {
   const data = '{"a":1,""'
-  jsonThrows(t, data, 2, {
+  jsonThrows(data, 2, {
     message: expectMessage({
       22: `Expected ':' after property name in JSON at`,
       default: 'Unexpected end of JSON input while parsing',
@@ -256,11 +280,10 @@ t.test('throws for end of input', (t) => {
     name: 'JSONParseError',
     systemError: SyntaxError,
   })
-  t.end()
 })
 
-t[currentNodeMajor >= 20 ? 'test' : 'skip']('coverage on node 20', (t) => {
-  t.match(
+test('coverage on node 20', { skip: currentNodeMajor < 20 }, () => {
+  assert.match(
     new parseJson.JSONParseError(
       { message: `Unexpected token \b at position 2` },
       'a'.repeat(4),
@@ -268,37 +291,32 @@ t[currentNodeMajor >= 20 ? 'test' : 'skip']('coverage on node 20', (t) => {
     ).message,
     /Unexpected token/
   )
-  t.end()
 })
 
-t.test('throws TypeError for undefined', (t) => {
-  jsonThrows(t, undefined, new TypeError('Cannot parse undefined'))
-  t.end()
+test('throws TypeError for undefined', () => {
+  jsonThrows(undefined, new TypeError('Cannot parse undefined'))
 })
 
-t.test('throws TypeError for non-strings', (t) => {
-  jsonThrows(t, new Map(), new TypeError('Cannot parse [object Map]'))
-  t.end()
+test('throws TypeError for non-strings', () => {
+  jsonThrows(new Map(), new TypeError('Cannot parse [object Map]'))
 })
 
-t.test('throws TypeError for empty arrays', (t) => {
-  jsonThrows(t, [], new TypeError('Cannot parse an empty array'))
-  t.end()
+test('throws TypeError for empty arrays', () => {
+  jsonThrows([], new TypeError('Cannot parse an empty array'))
 })
 
-t.test('handles empty string helpfully', (t) => {
-  jsonThrows(t, '', {
+test('handles empty string helpfully', () => {
+  jsonThrows('', {
     message: 'Unexpected end of JSON input while parsing empty string',
     name: 'JSONParseError',
     position: 0,
     code: 'EJSONPARSE',
     systemError: SyntaxError,
   })
-  t.end()
 })
 
-t.test('json parse error class', (t) => {
-  t.type(parseJson.JSONParseError, 'function')
+test('json parse error class', () => {
+  assert.strictEqual(typeof parseJson.JSONParseError, 'function')
 
   // we already checked all the various index checking logic above
   const poop = new Error('poop')
@@ -313,36 +331,34 @@ t.test('json parse error class', (t) => {
   }
   const bar = () => fooShouldNotShowUpInStackTrace()
   const err1 = bar()
-  t.equal(err1.systemError, poop, 'gets the original error attached')
-  t.equal(err1.position, 0)
-  t.equal(err1.message, `poop while parsing 'this is some json'`)
-  t.equal(err1.name, 'JSONParseError')
+  assert.strictEqual(err1.systemError, poop, 'gets the original error attached')
+  assert.strictEqual(err1.position, 0)
+  assert.strictEqual(err1.message, `poop while parsing 'this is some json'`)
+  assert.strictEqual(err1.name, 'JSONParseError')
   err1.name = 'something else'
-  t.equal(err1.name, 'JSONParseError')
-  t.notMatch(err1.stack, /fooShouldNotShowUpInStackTrace/)
+  assert.strictEqual(err1.name, 'JSONParseError')
+  assert.doesNotMatch(err1.stack, /fooShouldNotShowUpInStackTrace/)
+  assert.strictEqual(err1[Symbol.toStringTag], 'JSONParseError', 'Symbol.toStringTag is correct')
 
   // calling it directly, tho, it does
   const fooShouldShowUpInStackTrace = () => {
     return new parseJson.JSONParseError(poop, 'this is some json')
   }
   const err2 = fooShouldShowUpInStackTrace()
-  t.equal(err2.systemError, poop, 'gets the original error attached')
-  t.equal(err2.position, 0)
-  t.equal(err2.message, `poop while parsing 'this is some json'`)
-  t.match(err2.stack, /fooShouldShowUpInStackTrace/)
-
-  t.end()
+  assert.strictEqual(err2.systemError, poop, 'gets the original error attached')
+  assert.strictEqual(err2.position, 0)
+  assert.strictEqual(err2.message, `poop while parsing 'this is some json'`)
+  assert.match(err2.stack, /fooShouldShowUpInStackTrace/)
 })
 
-t.test('parse without exception', (t) => {
+test('parse without exception', () => {
   const bad = 'this is not json'
-  t.equal(parseJson.noExceptions(bad), undefined, 'does not throw')
+  assert.strictEqual(parseJson.noExceptions(bad), undefined, 'does not throw')
   const obj = { this: 'is json' }
   const good = JSON.stringify(obj)
-  t.same(parseJson.noExceptions(good), obj, 'parses json string')
+  assert.strictEqual(JSON.stringify(parseJson.noExceptions(good)), good, 'parses json string')
   const buf = Buffer.from(good)
-  t.same(parseJson.noExceptions(buf), obj, 'parses json buffer')
+  assert.strictEqual(JSON.stringify(parseJson.noExceptions(buf)), good, 'parses json buffer')
   const bom = Buffer.concat([Buffer.from([0xef, 0xbb, 0xbf]), buf])
-  t.same(parseJson.noExceptions(bom), obj, 'parses json buffer with bom')
-  t.end()
+  assert.strictEqual(JSON.stringify(parseJson.noExceptions(bom)), good, 'parses json buffer with bom')
 })
