@@ -1,5 +1,19 @@
 # Changelog
 
+## [6.0.0](https://github.com/npm/json-parse-even-better-errors/compare/v5.0.0...v6.0.0) (2026-05-08)
+### ⚠️ BREAKING CHANGES
+* `json-parse-even-better-errors` now supports node `^22.22.2 || ^24.15.0 || >=26.0.0`
+* template-oss-apply
+### Features
+* [`14de263`](https://github.com/npm/json-parse-even-better-errors/commit/14de263275c70a09f4df577dfea4904fc62b118b) [#89](https://github.com/npm/json-parse-even-better-errors/pull/89) bump to new node engine range (@owlstronaut)
+* [`2322ebf`](https://github.com/npm/json-parse-even-better-errors/commit/2322ebf7d94bda1ae33e41e50467793332c58cb5) [#89](https://github.com/npm/json-parse-even-better-errors/pull/89) template-oss-apply (@owlstronaut)
+### Chores
+* [`2da9b24`](https://github.com/npm/json-parse-even-better-errors/commit/2da9b243a9ddf8d99ab8d2b9c05a7531ab7391ed) [#89](https://github.com/npm/json-parse-even-better-errors/pull/89) template-oss-apply (@owlstronaut)
+* [`69ca8c6`](https://github.com/npm/json-parse-even-better-errors/commit/69ca8c6064e38552a106d440dbc5a7a132f58008) [#84](https://github.com/npm/json-parse-even-better-errors/pull/84) remove tap (@owlstronaut)
+* [`b71de59`](https://github.com/npm/json-parse-even-better-errors/commit/b71de59620d14b0cb05fd35f5bc3c3c6c2e1e526) [#84](https://github.com/npm/json-parse-even-better-errors/pull/84) swap from tap to built-in node:test (@owlstronaut)
+* [`8524267`](https://github.com/npm/json-parse-even-better-errors/commit/8524267849de7fc92f5b37a882ed8147940ea434) [#81](https://github.com/npm/json-parse-even-better-errors/pull/81) bump @npmcli/eslint-config from 5.1.0 to 6.0.0 (#81) (@dependabot[bot])
+* [`55f2fe3`](https://github.com/npm/json-parse-even-better-errors/commit/55f2fe3fd87993087d6e9756bbb10ec1e26337d9) [#87](https://github.com/npm/json-parse-even-better-errors/pull/87) bump @npmcli/template-oss from 4.29.0 to 4.30.0 (#87) (@dependabot[bot], @npm-cli-bot)
+
 ## [5.0.0](https://github.com/npm/json-parse-even-better-errors/compare/v4.0.0...v5.0.0) (2025-10-22)
 ### ⚠️ BREAKING CHANGES
 * `json-parse-even-better-errors` now supports node `^20.17.0 || >=22.9.0`
